@@ -26,6 +26,9 @@ class Vim < Formula
   depends_on :hg => :build if build.head?
   depends_on :python => :recommended
 
+  # In OS X 10.9, we need to include AvailabilityMacros.h
+  def patches; DATA; end if MacOS.version >= :mavericks
+
   def install
     ENV['LUA_PREFIX'] = HOMEBREW_PREFIX
 
@@ -72,3 +75,19 @@ class Vim < Formula
     ln_s bin+'vim', bin+'vi' if build.include? 'override-system-vi'
   end
 end
+
+__END__
+diff -r b314c98a48d4 src/os_unix.c
+--- a/src/os_unix.c	Wed Jun 26 14:04:47 2013 +0200
++++ b/src/os_unix.c	Wed Jun 26 07:27:05 2013 -0500
+@@ -18,6 +18,10 @@
+  * changed beyond recognition.
+  */
+
++#if defined(__APPLE__)
++#include <AvailabilityMacros.h>
++#endif
++
+ /*
+  * Some systems have a prototype for select() that has (int *) instead of
+  * (fd_set *), which is wrong. This define removes that prototype. We define
